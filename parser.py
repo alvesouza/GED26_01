@@ -617,9 +617,16 @@ def trabalho02_07():
                 manda_list[j],
             ))
             constraint += 1
+import collections
+def already_equivalent( All_Collections, new_collection):
+    for collection in All_Collections:
+        if collection == new_collection:
+            return True
+    return False
 
 def find_cicles_2(route_now = [0], size_cicle = 2, Manda_IDs = []):
     num_cidades = len(Manda_IDs)
+    All_Collections = []
     routes = []
     list_cities = Manda_IDs[route_now[len(route_now)-1]]
     if len(route_now) == size_cicle:
@@ -632,14 +639,17 @@ def find_cicles_2(route_now = [0], size_cicle = 2, Manda_IDs = []):
             routes.append(new_route)
     else:
         for i in list_cities:
-            if i in route_now or (len(route_now) > 1 and i < route_now[len(route_now) - 1]) or i < route_now[len(route_now) - 1]:
+            if i in route_now:
                 continue
             new_route = route_now.copy()
             new_route.append(i)
             aux_routes = find_cicles_2(new_route, size_cicle, Manda_IDs)
             for j in range(len(aux_routes)):
                 if aux_routes[j][0] == aux_routes[j][size_cicle]:
-                    routes.append(aux_routes[j])
+                    new_collection = collections.Counter(aux_routes[j][:-1])
+                    if not already_equivalent(All_Collections, new_collection):
+                        routes.append(aux_routes[j])
+                        All_Collections.append(new_collection)
     return routes
 
 
@@ -717,10 +727,17 @@ def trabalho02_08():
     size_max = len(Max)
     while num_ciclos < size_max:
         print("/*Proibir ciclos de tamanho {0}*/".format(num_ciclos))
+        All_Collections = []
         for i in range(size_max):
             list_cicles = find_cicles_2([i], num_ciclos, Manda_IDs)
+
             for j in range(len(list_cicles)):
                 cicle = list_cicles[j]
+                new_collection = collections.Counter(cicle[:-1])
+                if not already_equivalent(All_Collections, new_collection):
+                    All_Collections.append(new_collection)
+                else:
+                    continue
                 print("C{0}: ".format(constraint), end="")
                 constraint += 1
                 size_cicle = len(cicle) - 1
